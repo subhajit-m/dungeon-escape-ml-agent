@@ -30,16 +30,18 @@ public class RollerAgent : Agent
 
 
     public int coinsCollected = 0;
+    public bool isTouchingWall = false;
+    public bool isTouchingPillar = false;
+    public float steps = 0;
     public override void OnEpisodeBegin()
     {
         coinsCollected = 0;
+        steps = 0;
         // If the Agent fell, zero its momentum
-        if (coinsCollected == 0)
-        {
-            this.rBody.angularVelocity = Vector3.zero;
-            this.rBody.velocity = Vector3.zero;
-            this.transform.localPosition = new Vector3(0, 0.5f, 0);
-        }
+        
+        this.rBody.angularVelocity = Vector3.zero;
+        this.rBody.velocity = Vector3.zero;
+        this.transform.localPosition = new Vector3(0, 0.5f, 0);
 
         //make them stand on a place because they have been knocked out previously
         coin1.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
@@ -95,11 +97,14 @@ public class RollerAgent : Agent
         sensor.AddObservation(rBody.velocity.z);
     }
 
-    public float forceMultiplier = 5;
+    //r(x) = r(pilar)+r(wall)+r(coin)+num_coin
+    //weights = 2.5 + 2.5 + 80 + 15
+
+    
+    public float forceMultiplier = 1;
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        //Debug.Log("Called actionreceived");
-        // Actions, size = 2
+        steps++;
         Vector3 controlSignal = Vector3.zero;
         controlSignal.x = actionBuffers.ContinuousActions[0];
         controlSignal.z = actionBuffers.ContinuousActions[1];
@@ -115,20 +120,67 @@ public class RollerAgent : Agent
             //EndEpisode();
         //}
 
+        if (this.transform.localPosition.y < 0){
+            EndEpisode();
+        }
+        if(isTouchingWall){
+            //EndEpisode();
+        }
+
+
+        float rewardFromCoin = 0f;
+
         if(coinsCollected == 0){
-            //SetReward(0.0f);
+            rewardFromCoin = 0f;
         }
-        else if(coinsCollected == 0){
-            SetReward(0.33f);
+        else if(coinsCollected == 1){
+            rewardFromCoin = 33f;
         }
-        else if(coinsCollected == 0){
-            SetReward(0.66f);
+        else if(coinsCollected == 2){
+            rewardFromCoin = 66f;
         }
         else if (coinsCollected >= 3)
+        {
+            rewardFromCoin = 100f;
+        }
+
+        /*GameObject[] coins = {coin1, coin2, coin3, coin4, coin5};
+        float rewardFromMovingTowardsCoins = 0;
+        for(int i = 0; i<coins.Length; i++){
+            GameObject coin = coins[i];
+            if(coin.activeSelf){
+                float distanceToTarget = Vector3.Distance(this.transform.localPosition, coin.transform.localPosition);
+                if(distanceToTarget == 0){
+                    rewardFromMovingTowardsCoins+=17f;
+                }
+                else{
+                    rewardFromMovingTowardsCoins+= (17f * (1/distanceToTarget));
+                }
+            }
+            else{
+                rewardFromMovingTowardsCoins += 17f;
+            }
+        }*/
+
+//        float totalReward = (rewardFromCoin + rewardFromNotTouchingWall + rewardFromNotTouchingPillar + rewardFromMovingTowardsCoins)/100f;
+        float totalReward = (rewardFromCoin)/100f - (steps*0.0005f);
+        Debug.Log(totalReward);
+        if(totalReward <= -1){
+            SetReward(-1.0f);
+            EndEpisode();
+        }
+        if (coinsCollected >= 3)
         {
             SetReward(1.0f);
             EndEpisode();
         }
+        else{
+            SetReward(totalReward);
+        }
+
+
+
+        
     }
 
     //https://stackoverflow.com/questions/52338632/make-an-object-disappear-from-another-object-in-unity-c-sharp#:~:text=You%20can%20do%20that%20with,its%20renderer%20by%20using%20objectToDisappear.
@@ -140,6 +192,20 @@ public class RollerAgent : Agent
             Debug.Log(coinsCollected);
             col.gameObject.GetComponent<Renderer>().enabled = false;
             col.gameObject.SetActive(false);
+        }
+
+        if(col.gameObject.name == "topwall" || col.gameObject.name == "bottomwall" || col.gameObject.name == "leftwall" || col.gameObject.name == "rightwall"){
+            isTouchingWall = true;
+        }
+        else{
+            isTouchingWall = false;
+        }
+
+        if(col.gameObject.name == "pillar1" || col.gameObject.name == "pillar2" || col.gameObject.name == "pillar3" || col.gameObject.name == "pillar4"){
+            isTouchingPillar = true;
+        }
+        else{
+            isTouchingPillar = false;
         }
     } 
 
