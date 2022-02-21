@@ -101,7 +101,7 @@ public class RollerAgent : Agent
     //weights = 2.5 + 2.5 + 80 + 15
 
     
-    public float forceMultiplier = 1;
+    public float forceMultiplier = 10;
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
         steps++;
@@ -109,16 +109,6 @@ public class RollerAgent : Agent
         controlSignal.x = actionBuffers.ContinuousActions[0];
         controlSignal.z = actionBuffers.ContinuousActions[1];
         rBody.AddForce(controlSignal * forceMultiplier);
-
-        // Rewards
-        //float distanceToTarget = Vector3.Distance(this.transform.localPosition, coin1.transform.localPosition);
-
-        // Reached target
-        //if (distanceToTarget < 1.42f)
-        //{
-            //SetReward(1.0f);
-            //EndEpisode();
-        //}
 
         if (this.transform.localPosition.y < 0){
             EndEpisode();
@@ -163,11 +153,12 @@ public class RollerAgent : Agent
         }*/
 
 //        float totalReward = (rewardFromCoin + rewardFromNotTouchingWall + rewardFromNotTouchingPillar + rewardFromMovingTowardsCoins)/100f;
-        float totalReward = (rewardFromCoin)/100f - (steps*0.0005f);
+        float totalReward = ((rewardFromCoin)/100f) - (steps*0.0005f);
+        //float totalReward = ((rewardFromCoin)/100f);
         Debug.Log(totalReward);
         if(totalReward <= -1){
             SetReward(-1.0f);
-            EndEpisode();
+            //EndEpisode();
         }
         if (coinsCollected >= 3)
         {

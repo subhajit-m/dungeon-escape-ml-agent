@@ -227,6 +227,7 @@ GameObject:
   - component: {fileID: 963194228}
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
+  - component: {fileID: 963194229}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -299,6 +300,40 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 60, y: 0, z: 0}
+--- !u!114 &963194229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963194225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d889214ca3612646a48146bd5e424da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  modifiedScale: 1
+--- !u!1 &1100902016 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4286750368919171854, guid: fcfbcd0482ac05e4298857f06691189d, type: 3}
+  m_PrefabInstance: {fileID: 4286750370017697166}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1100902025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100902016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 318f5aaa961790540b01ef1e42138994, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Record: 0
+  NumStepsToRecord: 0
+  DemonstrationName: agent_demo1
+  DemonstrationDirectory: Demos
 --- !u!1001 &4286750370017697166
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -353,6 +388,22 @@ PrefabInstance:
     - target: {fileID: 4286750368842661785, guid: fcfbcd0482ac05e4298857f06691189d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4286750368919171849, guid: fcfbcd0482ac05e4298857f06691189d, type: 3}
+      propertyPath: forceMultiplier
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4286750368919171851, guid: fcfbcd0482ac05e4298857f06691189d, type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: ba88869f3fbd29b4a989fb7a2f094227, type: 3}
+    - target: {fileID: 4286750368919171851, guid: fcfbcd0482ac05e4298857f06691189d, type: 3}
+      propertyPath: m_BehaviorType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4286750368919171851, guid: fcfbcd0482ac05e4298857f06691189d, type: 3}
+      propertyPath: m_BrainParameters.NumStackedVectorObservations
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fcfbcd0482ac05e4298857f06691189d, type: 3}
