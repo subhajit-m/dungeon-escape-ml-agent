@@ -27,19 +27,25 @@ public class RollerAgent : Agent
 
     public GameObject door1;
     public GameObject door2;
-    public bool isDoorOpen = false;
+    private bool isDoorOpen = false;
+    private GameObject activated_door_reference;
 
     public GameObject dragon;
-    public bool dragonCollidedAgent = false;
+    private bool dragonCollidedAgent = false;
 
-    public int coinsCollected = 0;
-    public float steps = 0;
+    private int coinsCollected = 0;
+    private float steps = 0;
+
+    private float forceMultiplier = 5;
+
+
     public override void OnEpisodeBegin()
     {
         coinsCollected = 0;
         steps = 0;
         dragonCollidedAgent = false;
         isDoorOpen = false;
+        activated_door_reference = null;
         // If the Agent fell, zero its momentum
         
         this.rBody.angularVelocity = Vector3.zero;
@@ -93,31 +99,55 @@ public class RollerAgent : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        // Target and Agent positions
+        // coin Agent positions and activeness with 0/1 encoding
         sensor.AddObservation(coin1.transform.localPosition.x);
         sensor.AddObservation(coin1.transform.localPosition.z);
+        sensor.AddObservation(coin1.activeSelf ? 1: 0);
 
         sensor.AddObservation(coin2.transform.localPosition.x);
         sensor.AddObservation(coin2.transform.localPosition.z);
+        sensor.AddObservation(coin2.activeSelf ? 1: 0);
         
         sensor.AddObservation(coin3.transform.localPosition.x);
         sensor.AddObservation(coin3.transform.localPosition.z);
+        sensor.AddObservation(coin3.activeSelf ? 1: 0);
         
         sensor.AddObservation(coin4.transform.localPosition.x);
         sensor.AddObservation(coin4.transform.localPosition.z);
+        sensor.AddObservation(coin4.activeSelf ? 1: 0);
 
         sensor.AddObservation(coin5.transform.localPosition.x);
         sensor.AddObservation(coin5.transform.localPosition.z);
+        sensor.AddObservation(coin5.activeSelf ? 1: 0);
 
+        //dragons position
         sensor.AddObservation(dragon.transform.localPosition.x);
         sensor.AddObservation(dragon.transform.localPosition.z);
+
+        //agents position
+        sensor.AddObservation(this.transform.localPosition.x);
+        sensor.AddObservation(this.transform.localPosition.z);
         
         // Agent velocity
         sensor.AddObservation(rBody.velocity.x);
         sensor.AddObservation(rBody.velocity.z);
+
+        //door
+        //door is open?
+        sensor.AddObservation(isDoorOpen? 1: 0);
+
+        //open door coordinates
+        if(!isDoorOpen){
+            sensor.AddObservation(0);
+            sensor.AddObservation(0);
+        }
+        else{
+            sensor.AddObservation(activated_door_reference.transform.localPosition.x);
+            sensor.AddObservation(activated_door_reference.transform.localPosition.z);
+        }
     }
     
-    public float forceMultiplier = 10;
+    
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
         steps++;
@@ -143,40 +173,40 @@ public class RollerAgent : Agent
             rewardFromCoin = 0f;
         }
         else if(coinsCollected == 1){
-            rewardFromCoin = 33f;
+            rewardFromCoin = 30f;
         }
         else if(coinsCollected == 2){
-            rewardFromCoin = 66f;
+            rewardFromCoin = 60f;
         }
         else if (coinsCollected >= 3)
         {
-            rewardFromCoin = 100f;
+            rewardFromCoin = 90f;
         }
 
 
-        float totalReward = ((rewardFromCoin)/100f) - (steps*0.0005f);
+        float totalReward = ((rewardFromCoin)/100f) - (steps*0.0001f);
         //float totalReward = ((rewardFromCoin)/100f);
-        //Debug.Log(totalReward);
+        Debug.Log(totalReward);
         if(totalReward <= -1){
             SetReward(-1.0f);
             EndEpisode();
         }
-        if (coinsCollected >= 3)
-        {
-            SetReward(1.0f);
-            //EndEpisode();
+
+        if(!isDoorOpen){
+            SetReward(totalReward);
+            doorOpen();
         }
         else{
-            SetReward(totalReward);
+            if (this.transform.localPosition.x > rightWallReference.transform.localPosition.x + 1f){
+                SetReward(1.0f);
+                EndEpisode();
+                return;
+            }
+            else{
+                SetReward(totalReward);
+            }
         }
-
-
-        doorOpen();
-        if (this.transform.localPosition.x > rightWallReference.transform.localPosition.x + 1f){
-            SetReward(1.0f);
-            EndEpisode();
-            return;
-        }
+        
         
     }
 
@@ -203,11 +233,13 @@ public class RollerAgent : Agent
                 //open door 1
                 door1.gameObject.GetComponent<Renderer>().enabled = false;
                 door1.gameObject.SetActive(false);
+                activated_door_reference = door1;
             }
             else{
                 //open door 2
                 door2.gameObject.GetComponent<Renderer>().enabled = false;
                 door2.gameObject.SetActive(false);
+                activated_door_reference = door2;
             }
             isDoorOpen = true;
             

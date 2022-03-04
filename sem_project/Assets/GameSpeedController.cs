@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameSpeedController : MonoBehaviour
 {
-    [Range(0.1f, 20f)]
+    [Range(0.1f, 50f)]
     public float modifiedScale = 1f;
     // Start is called before the first frame update
     void Start()

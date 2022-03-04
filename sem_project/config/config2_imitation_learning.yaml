@@ -22,10 +22,10 @@ behaviors:
         strength: 1.0
       gail:
         strength: 0.1
-        demo_path: agentdemo1.demo
+        demo_path: agentdemo2.demo
     behavioral_cloning:
       strength: 0.5
-      demo_path: agentdemo1.demo
-    max_steps: 70000
+      demo_path: agentdemo2.demo
+    max_steps: 200000
     time_horizon: 64
     summary_freq: 1000

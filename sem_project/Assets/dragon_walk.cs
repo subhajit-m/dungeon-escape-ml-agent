@@ -16,24 +16,24 @@ public class dragon_walk : MonoBehaviour
 
     void strategy1Forward()
     {
-        this.transform.localPosition = new Vector3(-8f, 0.5f, 0f);
-        target = new Vector3(8f, 0.5f, 0f);
+        this.transform.localPosition = new Vector3(-7.4f, 0.5f, 0f);
+        target = new Vector3(7.4f, 0.5f, 0f);
     }
     void strategy1Reverse()
     {
-        this.transform.localPosition = new Vector3(8f, 0.5f, 0f);
-        target = new Vector3(-8f, 0.5f, 0f);
+        this.transform.localPosition = new Vector3(7.4f, 0.5f, 0f);
+        target = new Vector3(-7.4f, 0.5f, 0f);
     }
 
     void strategy2Forward()
     {
-        this.transform.localPosition = new Vector3(0f, 0.5f, -8f);
-        target = new Vector3(0f, 0.5f, 8f);
+        this.transform.localPosition = new Vector3(0f, 0.5f, -7.4f);
+        target = new Vector3(0f, 0.5f, 7.4f);
     }
     void strategy2Reverse()
     {
-        this.transform.localPosition = new Vector3(0f, 0.5f, 8f);
-        target = new Vector3(0f, 0.5f, -8f);
+        this.transform.localPosition = new Vector3(0f, 0.5f, 7.4f);
+        target = new Vector3(0f, 0.5f, -7.4f);
     }
 
 
@@ -41,7 +41,7 @@ public class dragon_walk : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         strategy = Random.Range(0f, 1f) < .5f ? 0 : 1;
-        Debug.Log(strategy);
+        //Debug.Log(strategy);
         //strategy = 1;
         if (strategy == 0)
         {
@@ -69,9 +69,6 @@ public class dragon_walk : MonoBehaviour
         dirToGo = this.target - this.transform.localPosition;
         dirToGo.y = 0;
         rb.rotation = Quaternion.LookRotation(dirToGo);
-        // rb.AddForce(dirToGo.normalized * walkSpeed * Time.fixedDeltaTime, walkForceMode);
-        // rb.MovePosition(rb.transform.TransformDirection(Vector3.forward * walkSpeed * Time.deltaTime));
-        // rb.MovePosition(rb.transform.TransformVector() (Vector3.forward * walkSpeed * Time.deltaTime));
         rb.MovePosition(transform.position + transform.forward * walkSpeed * Time.deltaTime);
 
         float distanceToTarget = Vector3.Distance(this.target, this.transform.localPosition);
