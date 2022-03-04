@@ -23,20 +23,23 @@ public class RollerAgent : Agent
     public GameObject coin4;
     public GameObject coin5;
 
-    public GameObject pillar1;
-    public GameObject pillar2;
-    public GameObject pillar3;
-    public GameObject pillar4;
+    public GameObject rightWallReference;
 
+    public GameObject door1;
+    public GameObject door2;
+    public bool isDoorOpen = false;
+
+    public GameObject dragon;
+    public bool dragonCollidedAgent = false;
 
     public int coinsCollected = 0;
-    public bool isTouchingWall = false;
-    public bool isTouchingPillar = false;
     public float steps = 0;
     public override void OnEpisodeBegin()
     {
         coinsCollected = 0;
         steps = 0;
+        dragonCollidedAgent = false;
+        isDoorOpen = false;
         // If the Agent fell, zero its momentum
         
         this.rBody.angularVelocity = Vector3.zero;
@@ -56,11 +59,11 @@ public class RollerAgent : Agent
         coin5.GetComponent<Rigidbody>().velocity = Vector3.zero;
 
         // Move the target to a new spot
-        coin1.transform.localPosition = new Vector3(Random.value * 8, 0.5f, Random.value * 8);
-        coin2.transform.localPosition = new Vector3(Random.value * 8, 0.5f, Random.value * 8);
-        coin3.transform.localPosition = new Vector3(Random.value * 8, 0.5f, Random.value * 8);
-        coin4.transform.localPosition = new Vector3(Random.value * 8, 0.5f, Random.value * 8);
-        coin5.transform.localPosition = new Vector3(Random.value * 8, 0.5f, Random.value * 8);
+        coin1.transform.localPosition = new Vector3((Random.Range(0f, 1f)<.5f?-1: 1) *Random.value * Random.Range(1, 10), 0.5f, (Random.Range(0f, 1f)<.5f?-1: 1) *Random.value * Random.Range(1, 10));
+        coin2.transform.localPosition = new Vector3((Random.Range(0f, 1f)<.5f?-1: 1) *Random.value * Random.Range(1, 10), 0.5f, (Random.Range(0f, 1f)<.5f?-1: 1) *Random.value * Random.Range(1, 10));
+        coin3.transform.localPosition = new Vector3((Random.Range(0f, 1f)<.5f?-1: 1) *Random.value * Random.Range(1, 10), 0.5f, (Random.Range(0f, 1f)<.5f?-1: 1) *Random.value * Random.Range(1, 10));
+        coin4.transform.localPosition = new Vector3((Random.Range(0f, 1f)<.5f?-1: 1) *Random.value * Random.Range(1, 10), 0.5f, (Random.Range(0f, 1f)<.5f?-1: 1) *Random.value * Random.Range(1, 10));
+        coin5.transform.localPosition = new Vector3((Random.Range(0f, 1f)<.5f?-1: 1) *Random.value * Random.Range(1, 10), 0.5f, (Random.Range(0f, 1f)<.5f?-1: 1) *Random.value * Random.Range(1, 10));
 
         //set them active
         coin1.SetActive(true);
@@ -76,30 +79,43 @@ public class RollerAgent : Agent
         coin4.GetComponent<Renderer>().enabled = true;
         coin5.GetComponent<Renderer>().enabled = true;
 
+        //doors set active
+        door1.SetActive(true);
+        door2.SetActive(true);
+
+        //render doors
+        door1.GetComponent<Renderer>().enabled = true;
+        door2.GetComponent<Renderer>().enabled = true;
+
+        GameEvent.current.NewEpisodeBeginAgent();
+
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
         // Target and Agent positions
-        sensor.AddObservation(coin1.transform.localPosition);
-        sensor.AddObservation(coin2.transform.localPosition);
-        sensor.AddObservation(coin3.transform.localPosition);
-        sensor.AddObservation(coin4.transform.localPosition);
-        sensor.AddObservation(coin5.transform.localPosition);
-        sensor.AddObservation(pillar1.transform.localPosition);
-        sensor.AddObservation(pillar2.transform.localPosition);
-        sensor.AddObservation(pillar3.transform.localPosition);
-        sensor.AddObservation(pillar4.transform.localPosition);
-        sensor.AddObservation(this.transform.localPosition);
+        sensor.AddObservation(coin1.transform.localPosition.x);
+        sensor.AddObservation(coin1.transform.localPosition.z);
 
+        sensor.AddObservation(coin2.transform.localPosition.x);
+        sensor.AddObservation(coin2.transform.localPosition.z);
+        
+        sensor.AddObservation(coin3.transform.localPosition.x);
+        sensor.AddObservation(coin3.transform.localPosition.z);
+        
+        sensor.AddObservation(coin4.transform.localPosition.x);
+        sensor.AddObservation(coin4.transform.localPosition.z);
+
+        sensor.AddObservation(coin5.transform.localPosition.x);
+        sensor.AddObservation(coin5.transform.localPosition.z);
+
+        sensor.AddObservation(dragon.transform.localPosition.x);
+        sensor.AddObservation(dragon.transform.localPosition.z);
+        
         // Agent velocity
         sensor.AddObservation(rBody.velocity.x);
         sensor.AddObservation(rBody.velocity.z);
     }
-
-    //r(x) = r(pilar)+r(wall)+r(coin)+num_coin
-    //weights = 2.5 + 2.5 + 80 + 15
-
     
     public float forceMultiplier = 10;
     public override void OnActionReceived(ActionBuffers actionBuffers)
@@ -111,12 +127,15 @@ public class RollerAgent : Agent
         rBody.AddForce(controlSignal * forceMultiplier);
 
         if (this.transform.localPosition.y < 0){
+            SetReward(-1.0f);
             EndEpisode();
+            return;
         }
-        if(isTouchingWall){
-            //EndEpisode();
+        if(dragonCollidedAgent){
+            SetReward(-1.0f);
+            EndEpisode();
+            return;
         }
-
 
         float rewardFromCoin = 0f;
 
@@ -134,71 +153,66 @@ public class RollerAgent : Agent
             rewardFromCoin = 100f;
         }
 
-        /*GameObject[] coins = {coin1, coin2, coin3, coin4, coin5};
-        float rewardFromMovingTowardsCoins = 0;
-        for(int i = 0; i<coins.Length; i++){
-            GameObject coin = coins[i];
-            if(coin.activeSelf){
-                float distanceToTarget = Vector3.Distance(this.transform.localPosition, coin.transform.localPosition);
-                if(distanceToTarget == 0){
-                    rewardFromMovingTowardsCoins+=17f;
-                }
-                else{
-                    rewardFromMovingTowardsCoins+= (17f * (1/distanceToTarget));
-                }
-            }
-            else{
-                rewardFromMovingTowardsCoins += 17f;
-            }
-        }*/
 
-//        float totalReward = (rewardFromCoin + rewardFromNotTouchingWall + rewardFromNotTouchingPillar + rewardFromMovingTowardsCoins)/100f;
         float totalReward = ((rewardFromCoin)/100f) - (steps*0.0005f);
         //float totalReward = ((rewardFromCoin)/100f);
-        Debug.Log(totalReward);
+        //Debug.Log(totalReward);
         if(totalReward <= -1){
             SetReward(-1.0f);
-            //EndEpisode();
+            EndEpisode();
         }
         if (coinsCollected >= 3)
         {
             SetReward(1.0f);
-            EndEpisode();
+            //EndEpisode();
         }
         else{
             SetReward(totalReward);
         }
 
 
-
+        doorOpen();
+        if (this.transform.localPosition.x > rightWallReference.transform.localPosition.x + 1f){
+            SetReward(1.0f);
+            EndEpisode();
+            return;
+        }
         
     }
 
     //https://stackoverflow.com/questions/52338632/make-an-object-disappear-from-another-object-in-unity-c-sharp#:~:text=You%20can%20do%20that%20with,its%20renderer%20by%20using%20objectToDisappear.
     void OnCollisionEnter(Collision col) 
     { 
-        if(col.gameObject.name == "coin1" || col.gameObject.name == "coin2" || col.gameObject.name == "coin3" || col.gameObject.name == "coin4" || col.gameObject.name == "coin5"){
-            Debug.Log(col.gameObject.name);
+        if(col.gameObject.name == "dragon"){
+            dragonCollidedAgent = true;
+            //Debug.Log("dragon touched agent");
+        }
+        else if(col.gameObject.name == "coin1" || col.gameObject.name == "coin2" || col.gameObject.name == "coin3" || col.gameObject.name == "coin4" || col.gameObject.name == "coin5"){
+            //Debug.Log(col.gameObject.name);
             coinsCollected++;
-            Debug.Log(coinsCollected);
+            //Debug.Log(coinsCollected);
             col.gameObject.GetComponent<Renderer>().enabled = false;
             col.gameObject.SetActive(false);
         }
-
-        if(col.gameObject.name == "topwall" || col.gameObject.name == "bottomwall" || col.gameObject.name == "leftwall" || col.gameObject.name == "rightwall"){
-            isTouchingWall = true;
-        }
-        else{
-            isTouchingWall = false;
-        }
-
-        if(col.gameObject.name == "pillar1" || col.gameObject.name == "pillar2" || col.gameObject.name == "pillar3" || col.gameObject.name == "pillar4"){
-            isTouchingPillar = true;
-        }
-        else{
-            isTouchingPillar = false;
-        }
     } 
+    public void doorOpen()
+    {
+        if(coinsCollected>=3 && !isDoorOpen){
+            int strategy = Random.Range(0f, 1f) < .5f ? 0 : 1;
+            if(strategy == 0){
+                //open door 1
+                door1.gameObject.GetComponent<Renderer>().enabled = false;
+                door1.gameObject.SetActive(false);
+            }
+            else{
+                //open door 2
+                door2.gameObject.GetComponent<Renderer>().enabled = false;
+                door2.gameObject.SetActive(false);
+            }
+            isDoorOpen = true;
+            
+        }
+    }
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
@@ -207,3 +221,4 @@ public class RollerAgent : Agent
         continuousActionsOut[1] = Input.GetAxis("Vertical");
     }
 }
+
