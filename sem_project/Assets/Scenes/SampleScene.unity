@@ -327,10 +327,10 @@ PrefabInstance:
     - target: {fileID: 395089635169393362, guid: e851e3b3b5d8df44b90f0693ba7e224f, type: 3}
       propertyPath: m_Model
       value: 
-      objectReference: {fileID: 5022602860645237092, guid: 65037edfe35fe524eb996533f5f32b51, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 395089635169393362, guid: e851e3b3b5d8df44b90f0693ba7e224f, type: 3}
       propertyPath: m_BehaviorType
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 395089635169393374, guid: e851e3b3b5d8df44b90f0693ba7e224f, type: 3}
       propertyPath: Record
@@ -342,11 +342,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 395089635169393374, guid: e851e3b3b5d8df44b90f0693ba7e224f, type: 3}
       propertyPath: DemonstrationName
-      value: agent_demo_10
+      value: agent_demo_50
       objectReference: {fileID: 0}
     - target: {fileID: 395089635169393374, guid: e851e3b3b5d8df44b90f0693ba7e224f, type: 3}
       propertyPath: DemonstrationDirectory
-      value: Demos/stat2
+      value: Demos/stat3
       objectReference: {fileID: 0}
     - target: {fileID: 395089635277166144, guid: e851e3b3b5d8df44b90f0693ba7e224f, type: 3}
       propertyPath: m_RootOrder

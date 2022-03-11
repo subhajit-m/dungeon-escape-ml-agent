@@ -260,7 +260,7 @@ public class RollerAgent : Agent
 
     private bool isHeaderWritten = false;
     public void writeStatistics(){
-        string path = "Assets/stats/stat2.txt";
+        string path = "Assets/stats/stat3.txt";
         StreamWriter writer = new StreamWriter(path, true);
         string data = "";
         if(!isHeaderWritten){
