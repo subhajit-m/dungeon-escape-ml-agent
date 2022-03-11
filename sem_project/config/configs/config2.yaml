@@ -31,10 +31,10 @@ behaviors:
         learning_rate: 0.0003
         use_actions: false
         use_vail: false
-        demo_path: agentdemo2.demo
+        demo_path: agentdemo10.demo
     behavioral_cloning:
-      strength: 1
-      demo_path: agentdemo2.demo
-    max_steps: 200000
+      strength: 0.5
+      demo_path: agentdemo10.demo
+    max_steps: 100000
     time_horizon: 64
-    summary_freq: 1000
+    summary_freq: 2000
