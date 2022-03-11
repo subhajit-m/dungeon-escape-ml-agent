@@ -320,21 +320,33 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 395089635169393360, guid: e851e3b3b5d8df44b90f0693ba7e224f, type: 3}
+      propertyPath: collectStats
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 395089635169393362, guid: e851e3b3b5d8df44b90f0693ba7e224f, type: 3}
       propertyPath: m_Model
       value: 
-      objectReference: {fileID: 5022602860645237092, guid: e2f899d16fa959f4d8edb60eb8d60eaa, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 395089635169393362, guid: e851e3b3b5d8df44b90f0693ba7e224f, type: 3}
       propertyPath: m_BehaviorType
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 395089635169393374, guid: e851e3b3b5d8df44b90f0693ba7e224f, type: 3}
       propertyPath: Record
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 395089635169393374, guid: e851e3b3b5d8df44b90f0693ba7e224f, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 395089635169393374, guid: e851e3b3b5d8df44b90f0693ba7e224f, type: 3}
       propertyPath: DemonstrationName
-      value: agent_demo_2
+      value: agent_demo_10
+      objectReference: {fileID: 0}
+    - target: {fileID: 395089635169393374, guid: e851e3b3b5d8df44b90f0693ba7e224f, type: 3}
+      propertyPath: DemonstrationDirectory
+      value: Demos/stat2
       objectReference: {fileID: 0}
     - target: {fileID: 395089635277166144, guid: e851e3b3b5d8df44b90f0693ba7e224f, type: 3}
       propertyPath: m_RootOrder

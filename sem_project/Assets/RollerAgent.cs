@@ -3,6 +3,7 @@ using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Actuators;
+using System.IO;
 
 public class RollerAgent : Agent
 {
@@ -27,22 +28,31 @@ public class RollerAgent : Agent
 
     public GameObject door1;
     public GameObject door2;
-    private bool isDoorOpen = false;
-    private GameObject activated_door_reference;
 
     public GameObject dragon;
-    private bool dragonCollidedAgent = false;
 
+    public bool collectStats = true;
+
+    
+    private bool isDoorOpen = false;
+    private GameObject activated_door_reference;
+    private bool dragonCollidedAgent = false;
     private int coinsCollected = 0;
     private float steps = 0;
-
+    private bool maxStepsReached = false;
+    private bool agentFinishedTask = false;
     private float forceMultiplier = 5;
 
 
     public override void OnEpisodeBegin()
     {
+        if(collectStats){
+            writeStatistics();
+        }
         coinsCollected = 0;
         steps = 0;
+        maxStepsReached = false;
+        agentFinishedTask = false;
         dragonCollidedAgent = false;
         isDoorOpen = false;
         activated_door_reference = null;
@@ -188,6 +198,7 @@ public class RollerAgent : Agent
         //float totalReward = ((rewardFromCoin)/100f);
         Debug.Log(totalReward);
         if(totalReward <= -1){
+            maxStepsReached = true;
             SetReward(-1.0f);
             EndEpisode();
         }
@@ -198,6 +209,7 @@ public class RollerAgent : Agent
         }
         else{
             if (this.transform.localPosition.x > rightWallReference.transform.localPosition.x + 1f){
+                agentFinishedTask = true;
                 SetReward(1.0f);
                 EndEpisode();
                 return;
@@ -244,6 +256,57 @@ public class RollerAgent : Agent
             isDoorOpen = true;
             
         }
+    }
+
+    private bool isHeaderWritten = false;
+    public void writeStatistics(){
+        string path = "Assets/stats/stat1.txt";
+        StreamWriter writer = new StreamWriter(path, true);
+        string data = "";
+        if(!isHeaderWritten){
+            data = "1 coin collected, 2 coins collected, 3 coins collected, completed gameplay, busted due to maxsteps, busted due to dragon";
+            isHeaderWritten = true;
+        }
+        else{
+            if(coinsCollected >= 1){
+                data = data + "1,";
+            }
+            else{
+                data = data + "0,";
+            }
+            if(coinsCollected >= 2){
+                data = data + "1,";
+            }
+            else{
+                data = data + "0,";
+            }
+            if(coinsCollected >= 3){
+                data = data + "1,";
+            }
+            else{
+                data = data + "0,";
+            }
+            if(agentFinishedTask){
+                data = data + "1,";
+            }
+            else{
+                data = data + "0,";
+            }
+            if(maxStepsReached){
+                data = data + "1,";
+            }
+            else{
+                data = data + "0,";
+            }
+            if(dragonCollidedAgent){
+                data = data + "1";
+            }
+            else{
+                data = data + "0";
+            }
+        }
+        writer.WriteLine(data);
+        writer.Close();
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
